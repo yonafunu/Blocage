@@ -81,7 +81,7 @@ def get_unique_numbers(numbers):
     return list_of_unique_numbers
 
 yi=1950
-yf=2020
+yf=1951
 
 ##########################################
 ####LOAD DATA FILES
@@ -981,47 +981,47 @@ x=np.asarray(final_lon)
 y=np.asarray(final_lat)
 
 
-fig = plt.figure(figsize=(26,9))    
-bbox = [-170,30,170,75]   
+# fig = plt.figure(figsize=(26,9))    
+# bbox = [-170,30,170,75]   
 
-m = Basemap(llcrnrlon=bbox[0],llcrnrlat=bbox[1],urcrnrlon=bbox[2],
-            urcrnrlat=bbox[3],resolution='i', projection='mill')
-m.fillcontinents(color='#d9b38c',lake_color='#bdd5d5') # continent colors
-m.drawmapboundary(fill_color='#bdd5d5') # ocean color
-m.drawcoastlines() 
-m.drawcountries()
-states = m.drawstates() # draw state boundaries
-m.drawparallels(np.arange(-90,90,10),labels=[True,False,False,False])
-m.drawmeridians(np.arange(-180,180,30),labels=[0,0,0,1])
+# m = Basemap(llcrnrlon=bbox[0],llcrnrlat=bbox[1],urcrnrlon=bbox[2],
+#             urcrnrlat=bbox[3],resolution='i', projection='mill')
+# m.fillcontinents(color='#d9b38c',lake_color='#bdd5d5') # continent colors
+# m.drawmapboundary(fill_color='#bdd5d5') # ocean color
+# m.drawcoastlines() 
+# m.drawcountries()
+# states = m.drawstates() # draw state boundaries
+# m.drawparallels(np.arange(-90,90,10),labels=[True,False,False,False])
+# m.drawmeridians(np.arange(-180,180,30),labels=[0,0,0,1])
 
-m.scatter(final_lon,final_lat,c=final_intensity,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
-#m.hexbin(log_lon_spa,log_lat_spa,c=log_intensity_spa,gridsize=50, cmap='inferno')
-#m.hexbin(x,y, cmap='inferno',zorder=2)
-plt.colorbar(fraction=0.030)
-plt.clim(0,4)
-string_title=u'Blocking events intensities - ATL ANNUAL ALL -  '+str(yi)+'-'+str(yf)
-plt.title(string_title, size='xx-large')
-plt.savefig('./logs/blocage_atl_all_size_'+str(yi)+'-'+str(yf)+'.png', bbox_inches='tight', pad_inches=0.1)
+# m.scatter(final_lon,final_lat,c=final_intensity,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
+# #m.hexbin(log_lon_spa,log_lat_spa,c=log_intensity_spa,gridsize=50, cmap='inferno')
+# #m.hexbin(x,y, cmap='inferno',zorder=2)
+# plt.colorbar(fraction=0.030)
+# plt.clim(0,4)
+# string_title=u'Blocking events intensities - ATL ANNUAL ALL -  '+str(yi)+'-'+str(yf)
+# plt.title(string_title, size='xx-large')
+# plt.savefig('./logs/blocage_atl_all_size_'+str(yi)+'-'+str(yf)+'.png', bbox_inches='tight', pad_inches=0.1)
 
-fig = plt.figure(figsize=(26,9))    
-bbox = [-170,30,170,75]   
+# fig = plt.figure(figsize=(26,9))    
+# bbox = [-170,30,170,75]   
 
-m = Basemap(llcrnrlon=bbox[0],llcrnrlat=bbox[1],urcrnrlon=bbox[2],
-            urcrnrlat=bbox[3],resolution='i', projection='mill')
-m.fillcontinents(color='#d9b38c',lake_color='#bdd5d5') # continent colors
-m.drawmapboundary(fill_color='#bdd5d5') # ocean color
-m.drawcoastlines() 
-m.drawcountries()
-states = m.drawstates() # draw state boundaries
-m.drawparallels(np.arange(-90,90,10),labels=[True,False,False,False])
-m.drawmeridians(np.arange(-180,180,30),labels=[0,0,0,1])
+# m = Basemap(llcrnrlon=bbox[0],llcrnrlat=bbox[1],urcrnrlon=bbox[2],
+#             urcrnrlat=bbox[3],resolution='i', projection='mill')
+# m.fillcontinents(color='#d9b38c',lake_color='#bdd5d5') # continent colors
+# m.drawmapboundary(fill_color='#bdd5d5') # ocean color
+# m.drawcoastlines() 
+# m.drawcountries()
+# states = m.drawstates() # draw state boundaries
+# m.drawparallels(np.arange(-90,90,10),labels=[True,False,False,False])
+# m.drawmeridians(np.arange(-180,180,30),labels=[0,0,0,1])
 
-m.scatter(log_lon_spa,log_lat_spa,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
-#m.scatter(log_lon_spa,log_lat_spa,c=log_intensity_spa,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
-#m.hexbin(log_lon_spa,log_lat_spa,c=log_intensity_spa,gridsize=50, cmap='inferno')
-#m.hexbin(x,y, cmap='inferno',zorder=2)
-plt.colorbar(fraction=0.030)
-plt.clim(0,4)
-string_title=u'Blocking events intensities - ATL ANNUAL ALL -  '+str(yi)+'-'+str(yf)
-plt.title(string_title, size='xx-large')
-plt.savefig('./logs/longitude_'+str(yi)+'-'+str(yf)+'.png', bbox_inches='tight', pad_inches=0.1)
+# m.scatter(log_lon_spa,log_lat_spa,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
+# #m.scatter(log_lon_spa,log_lat_spa,c=log_intensity_spa,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
+# #m.hexbin(log_lon_spa,log_lat_spa,c=log_intensity_spa,gridsize=50, cmap='inferno')
+# #m.hexbin(x,y, cmap='inferno',zorder=2)
+# plt.colorbar(fraction=0.030)
+# plt.clim(0,4)
+# string_title=u'Blocking events intensities - ATL ANNUAL ALL -  '+str(yi)+'-'+str(yf)
+# plt.title(string_title, size='xx-large')
+# plt.savefig('./logs/longitude_'+str(yi)+'-'+str(yf)+'.png', bbox_inches='tight', pad_inches=0.1)
