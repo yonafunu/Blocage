@@ -24,13 +24,18 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import numpy as np
 #from carto import scale_bar
-from datetime import datetime
 import xarray as xr
 import numpy.ma as ma
 import seaborn as sns
 import pandas as pd
 import csv
 import matplotlib.ticker as ticker
+import os
+from datetime import datetime, timedelta
+
+path="/Users/jonathandurand/Documents/UQAM/blocage/blocagemix"
+os.chdir(path)
+
 
 def mean_coord(londeg,latdeg):
     
@@ -81,7 +86,7 @@ def get_unique_numbers(numbers):
     return list_of_unique_numbers
 
 yi=1950
-yf=1951
+yf=2020
 
 ##########################################
 ####LOAD DATA FILES
@@ -159,19 +164,20 @@ for lamb in delta:
 ##########################################
 ####COMPUTE FIRST PART GHGS + GHGS AND FILTER 1 TEMPORAL
 ##########################################
-
+print("Compute GPM gradients")
 ### COMPUTE GHGN AND GHGS ##
 for nt in range(0, len(zgp_data)):
-      print("progress nt ", nt, len(zgp_data))
       for i in range(len(phin)):     
           for ni in range(0, len(zgp_data[0][0])):         
               GHGN[nt,idxn[i],ni]=((zgp_data[nt,idxn[i],ni])-(zgp_data[nt,idxo[i],ni]))/(phin[i]-phio[i])
               GHGS[nt,idxs[i],ni]=((zgp_data[nt,idxo[i],ni])-(zgp_data[nt,idxs[i],ni]))/(phio[i]-phis[i])
 
+print("Find blocks from blocked longitudes")
+
 ### CREATE NEW VARIABLE WITH 1 FOR LONGITUDE BLOCKED AND NaN FOR NOT BLOCKED
 z_clim=np.array(z_clim)
 for nt in range(0, len(zgp_data)):
-      print("progress nt ", nt, len(zgp_data))
+#      print("progress nt ", nt, len(zgp_data))
       indice=0
       for i in range(len(phin)): 
           indice=indice+1
@@ -185,10 +191,12 @@ for nt in range(0, len(zgp_data)):
                       lon_blo[nt,ni]=np.nan              
 
 
+print("FILTER 1 : Spatial extension criteria")
+
 ### FILTER 1 : EXTENSION CRITERIA. ALLOWING ONE NON BLOCKED BETWEEN TWO BLOCKED LONGITUDE/ MINIMUM 12.5° = 5 LONGITUDE
 for nt in range(0, len(zgp_data)):
 #for nt in range(54, 55):
-    print("nt", nt)
+    #print("nt", nt)
     v=0
     ni=-1
     out=0
@@ -344,6 +352,7 @@ zlist1=[]
 zlist=[]
 total_blocks=0
 
+print("Attribute a number to each block")
 
 ### ATTRIBUTE A NUMBER TO EACH BLOCK###
 for t in range(len(zgp_data)):
@@ -386,6 +395,7 @@ for t in range(len(zgp_data)):
                 lon_blo_ind[t,ni-v:ni]=total_blocks
             v=0
 
+print("Compute center for each blocked longitudes")
 
 ##CENTER BLOCKED LONGITUDES DETECTION
 ###threhold for min max lon box is 5° East/West from the blocked longitude ##
@@ -463,7 +473,8 @@ for nt in range(0, len(zgp_data)):
         
         ##compute size of longitude blocked - 4 artificial blocked 
         ###on compute la moyenne latitudinale de la gpm , on regarde quelle longitude a le gpm le plus haut
-        
+#        if nt==12 or nt==13 or nt==13 or nt==14 or nt==15 or nt==16:
+#            print("lon",nt, lon_box)
         size=len(lon_box)-4
         for i in range(len(lon_box)):
             lon_pos=np.mean(zgp_data[nt,minlat:maxlat+1,lon_box[i]])
@@ -483,7 +494,8 @@ for nt in range(0, len(zgp_data)):
             if lat_pos > lat_pos_ref:
                 lat_pos_ref=lat_pos
                 lat_ind=lat_box[i]
-                
+#        if nt==12 or nt==13 or nt==13 or nt==14 or nt==15 or nt==16:
+#            print("lonind",nt, lon_ind, longitude[lon_ind], block_val)                
         log_indice.append(block_val)
         log_s.append(size)
         log_date.append(datime[nt])
@@ -503,6 +515,8 @@ df_size_dai = pd.DataFrame (log_s, columns = ['size'])
 df_size_dai.to_csv('./logs/size_daily_event_no_temp_criteria.csv', sep=',')                       
                 
  
+print("FILTER 2: Blocking under 45deg are unique")
+
 ## FILTER 2 : SPATIAL CRITERIA. Blockings within 45° is unique, keeping only the one with highest height. 
 log_indice_spa=log_indice.copy()
 log_date_spa=log_date.copy()
@@ -580,6 +594,7 @@ for index in sorted(listunique, reverse=True):
 ####################################             
 ### BLOCKING INTENSITIES COMPUTATION   
 ####################################
+print("Compute blocking intensities")
 
 val_deg=20
 log_intensity_spa=[]
@@ -645,6 +660,7 @@ for i in range(len(log_date_spa)):
 lon_blo_filtered2[np.isnan(lon_blo_filtered2)]=0
 total_blocks=0
 lon_blo_filtered3[lon_blo_filtered3==0]=np.nan
+print("Temporal filter : 5 days at least. Longest part to compute, be patient")
 
 ### ATTRIBUTE A NUMBER TO EACH BLOCK PART 2 ###
 
@@ -702,9 +718,9 @@ index_right=[]
 index_left=[]
 p=0
 for t in range(len(zgp_data)):
-#for t in range(12,12+1,1):
+#for t in range(12,70+1,1):
       stop=0
-      nb_day=0
+      nb_day=1
       for ni in range(len(lon_blo_filtered3[0])):
         if np.isnan(lon_blo_filtered3[t,ni]) == False :
             #print("on est la 1")
@@ -862,7 +878,7 @@ for t in range(len(zgp_data)):
                                         if len(block_true)>=5:
                                             block_true.sort()
                                             final_blo.append(block_true)
-                                            final_duration.append(nb_day)
+                                            final_duration.append(nb_day-2)
                                         p=0
                                         block_true=[]
                                         block_checked.sort()
@@ -879,7 +895,9 @@ final_lon=[]
 final_lat=[]
 final_intensity=[]
 final_date=[]
+print("Compute final blocking lon/lat coordinates : New method")
 
+# ##NEW WAY TO COMPUTE COORDINATES MEAN
 # ###!!!! -1 car faut trouver solution pour le dernier blocage
 # for i in range(len(final_blo)-1):
 #     #print(final_blo[i])
@@ -896,13 +914,14 @@ final_date=[]
 #         indice=0
 #         val=temp_list[y]
 #         if y==0:
-#             val_date=log_date_spa[val]     
+#             val_date=log_date_spa[val-1]     
 #         ###intensity
 #         val_int_sum=val_int_sum+log_intensity_spa[val]
 #         #print("val", val,log_intensity_spa[val] )
 #         ###longitude latitude
-#         temp_lon_list.append(log_lon_spa[val])
-#         temp_lat_list.append(log_lat_spa[val])
+#         #print("debug", log_lon_spa[val-1], val )
+#         temp_lon_list.append(log_lon_spa[val-1])
+#         temp_lat_list.append(log_lat_spa[val-1])
 #         #val_lon_sum=val_lon_sum+log_lon_spa[val]
 #         #val_lat_sum=val_lat_sum+log_lat_spa[val]
 #         #val_duration_sum=val_duration_sum+log_date_spa[val]
@@ -923,35 +942,57 @@ final_date=[]
 #     final_lon.append(londeg)
 #     final_lat.append(latdeg)    
 #     final_intensity.append(val_int_moy)
-# #    final_lon.append(val_lon_moy)
-# #    final_lat.append(val_lat_moy)
 #     final_date.append(val_date)
-###!!!! -1 car faut trouver solution pour le dernier blocage
-for i in range(len(final_blo)-1):
+
+###OLD WAY
+##!!!! -1 car faut trouver solution pour le dernier blocage
+#
+debug=[]
+debug_val=[]
+for i in range(len(final_blo)):
+#for i in range(0,1,1):
     #print(final_blo[i])
     val_int_sum=0
     val_lon_sum=0
     val_lat_sum=0
     val_dat_sum=0
+    all_lon=[]
+    all_lat=[]
+    all_int=[]
     #val_duration_sum=0
     temp_list=final_blo[i]
     for y in range(len(temp_list)):
         indice=0
         val=temp_list[y]
         if y==0:
-            val_date=log_date_spa[val]     
+            #val_date=log_date_spa[val]     
+            val_date=log_date_spa[val-1]     
         ###intensity
         val_int_sum=val_int_sum+log_intensity_spa[val]
         #print("val", val,log_intensity_spa[val] )
         ###longitude latitude
-        val_lon_sum=val_lon_sum+log_lon_spa[val]
-        val_lat_sum=val_lat_sum+log_lat_spa[val]
+        debug_val.append(val)
+        debug.append(log_lon_spa[val-1])
+        #print("debug", log_lon_spa[val-1], val )
+        if log_lon_spa[val-1] > 180:
+            val_lon=log_lon_spa[val-1]-360
+        else:
+            val_lon=log_lon_spa[val-1]
+            
+        all_int.append(log_intensity_spa[val-1])
+        all_lon.append(val_lon)
+        all_lat.append(log_lat_spa[val-1])
+        #val_lon_sum=val_lon_sum+val_lon
+        #val_lat_sum=val_lat_sum+log_lat_spa[val-1]
         #val_duration_sum=val_duration_sum+log_date_spa[val]
         
-    val_int_moy=val_int_sum/len(temp_list)
-    val_lon_moy=val_lon_sum/len(temp_list)
-    val_lat_moy=val_lat_sum/len(temp_list)
-
+    #val_int_moy=val_int_sum/len(temp_list)
+    #val_lon_moy=val_lon_sum/len(temp_list)
+    #val_lat_moy=val_lat_sum/len(temp_list)
+    val_int_moy=np.mean(all_int)
+    val_lon_moy=np.mean(all_lon)
+    val_lat_moy=np.mean(all_lat)
+    
     final_intensity.append(val_int_moy)
     final_lon.append(val_lon_moy)
     final_lat.append(val_lat_moy)
@@ -960,6 +1001,7 @@ for i in range(len(final_blo)-1):
 arr=np.array(final_duration)
 #final_duration=np.array(final_duration)
 
+print("Creating plot and save all datas")
 
 df_lon = pd.DataFrame (final_lon, columns = ['longitude'])
 df_lon.to_csv('./logs/final_lon.csv', sep=',')
@@ -981,47 +1023,47 @@ x=np.asarray(final_lon)
 y=np.asarray(final_lat)
 
 
-# fig = plt.figure(figsize=(26,9))    
-# bbox = [-170,30,170,75]   
+fig = plt.figure(figsize=(26,9))    
+bbox = [-170,30,170,75]   
 
-# m = Basemap(llcrnrlon=bbox[0],llcrnrlat=bbox[1],urcrnrlon=bbox[2],
-#             urcrnrlat=bbox[3],resolution='i', projection='mill')
-# m.fillcontinents(color='#d9b38c',lake_color='#bdd5d5') # continent colors
-# m.drawmapboundary(fill_color='#bdd5d5') # ocean color
-# m.drawcoastlines() 
-# m.drawcountries()
-# states = m.drawstates() # draw state boundaries
-# m.drawparallels(np.arange(-90,90,10),labels=[True,False,False,False])
-# m.drawmeridians(np.arange(-180,180,30),labels=[0,0,0,1])
+m = Basemap(llcrnrlon=bbox[0],llcrnrlat=bbox[1],urcrnrlon=bbox[2],
+            urcrnrlat=bbox[3],resolution='i', projection='mill')
+m.fillcontinents(color='#d9b38c',lake_color='#bdd5d5') # continent colors
+m.drawmapboundary(fill_color='#bdd5d5') # ocean color
+m.drawcoastlines() 
+m.drawcountries()
+states = m.drawstates() # draw state boundaries
+m.drawparallels(np.arange(-90,90,10),labels=[True,False,False,False])
+m.drawmeridians(np.arange(-180,180,30),labels=[0,0,0,1])
 
-# m.scatter(final_lon,final_lat,c=final_intensity,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
-# #m.hexbin(log_lon_spa,log_lat_spa,c=log_intensity_spa,gridsize=50, cmap='inferno')
-# #m.hexbin(x,y, cmap='inferno',zorder=2)
-# plt.colorbar(fraction=0.030)
-# plt.clim(0,4)
-# string_title=u'Blocking events intensities - ATL ANNUAL ALL -  '+str(yi)+'-'+str(yf)
-# plt.title(string_title, size='xx-large')
-# plt.savefig('./logs/blocage_atl_all_size_'+str(yi)+'-'+str(yf)+'.png', bbox_inches='tight', pad_inches=0.1)
+m.scatter(final_lon,final_lat,c=final_intensity,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
+#m.hexbin(log_lon_spa,log_lat_spa,c=log_intensity_spa,gridsize=50, cmap='inferno')
+#m.hexbin(x,y, cmap='inferno',zorder=2)
+plt.colorbar(fraction=0.030)
+plt.clim(0,4)
+string_title=u'Blocking events intensities - ATL ANNUAL ALL -  '+str(yi)+'-'+str(yf)
+plt.title(string_title, size='xx-large')
+plt.savefig('./logs/blocage_atl_all_size_'+str(yi)+'-'+str(yf)+'.png', bbox_inches='tight', pad_inches=0.1)
 
-# fig = plt.figure(figsize=(26,9))    
-# bbox = [-170,30,170,75]   
+fig = plt.figure(figsize=(26,9))    
+bbox = [-170,30,170,75]   
 
-# m = Basemap(llcrnrlon=bbox[0],llcrnrlat=bbox[1],urcrnrlon=bbox[2],
-#             urcrnrlat=bbox[3],resolution='i', projection='mill')
-# m.fillcontinents(color='#d9b38c',lake_color='#bdd5d5') # continent colors
-# m.drawmapboundary(fill_color='#bdd5d5') # ocean color
-# m.drawcoastlines() 
-# m.drawcountries()
-# states = m.drawstates() # draw state boundaries
-# m.drawparallels(np.arange(-90,90,10),labels=[True,False,False,False])
-# m.drawmeridians(np.arange(-180,180,30),labels=[0,0,0,1])
+m = Basemap(llcrnrlon=bbox[0],llcrnrlat=bbox[1],urcrnrlon=bbox[2],
+            urcrnrlat=bbox[3],resolution='i', projection='mill')
+m.fillcontinents(color='#d9b38c',lake_color='#bdd5d5') # continent colors
+m.drawmapboundary(fill_color='#bdd5d5') # ocean color
+m.drawcoastlines() 
+m.drawcountries()
+states = m.drawstates() # draw state boundaries
+m.drawparallels(np.arange(-90,90,10),labels=[True,False,False,False])
+m.drawmeridians(np.arange(-180,180,30),labels=[0,0,0,1])
 
-# m.scatter(log_lon_spa,log_lat_spa,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
-# #m.scatter(log_lon_spa,log_lat_spa,c=log_intensity_spa,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
-# #m.hexbin(log_lon_spa,log_lat_spa,c=log_intensity_spa,gridsize=50, cmap='inferno')
-# #m.hexbin(x,y, cmap='inferno',zorder=2)
-# plt.colorbar(fraction=0.030)
-# plt.clim(0,4)
-# string_title=u'Blocking events intensities - ATL ANNUAL ALL -  '+str(yi)+'-'+str(yf)
-# plt.title(string_title, size='xx-large')
-# plt.savefig('./logs/longitude_'+str(yi)+'-'+str(yf)+'.png', bbox_inches='tight', pad_inches=0.1)
+m.scatter(log_lon_spa,log_lat_spa,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
+#m.scatter(log_lon_spa,log_lat_spa,c=log_intensity_spa,latlon=True, s=20, marker='o', alpha=1, edgecolor='k', linewidth=1, zorder=2,cmap=plt.cm.jet)
+#m.hexbin(log_lon_spa,log_lat_spa,c=log_intensity_spa,gridsize=50, cmap='inferno')
+#m.hexbin(x,y, cmap='inferno',zorder=2)
+plt.colorbar(fraction=0.030)
+plt.clim(0,4)
+string_title=u'Blocking events intensities - ATL ANNUAL ALL -  '+str(yi)+'-'+str(yf)
+plt.title(string_title, size='xx-large')
+plt.savefig('./logs/longitude_'+str(yi)+'-'+str(yf)+'.png', bbox_inches='tight', pad_inches=0.1)
