@@ -86,7 +86,7 @@ def get_unique_numbers(numbers):
     return list_of_unique_numbers
 
 yi=1950
-yf=2020
+yf=1952
 
 ##########################################
 ####LOAD DATA FILES
@@ -720,19 +720,14 @@ index_right=[]
 index_left=[]
 p=0
 for t in range(len(zgp_data)):
-#for t in range(479,485+1,1):
+#for t in range(0,30+1,1):
       stop=0
       nb_day=1
       for ni in range(len(lon_blo_filtered3[0])):
         if np.isnan(lon_blo_filtered3[t,ni]) == False :
             #print("on est la 1")
             ###On recupere la valeur du bloc###
-            block_true=[]
             block_val=int(lon_blo_filtered3[t,ni])
-            #if block_val ==312:
-            #    print("block check 312 before", block_checked )
-            #if block_val ==310:
-            #    print("block check 310 before", block_checked )
             #print("on est la 2", block_val)
             if block_val not in block_checked or len(block_checked)==0:              
                 idx=0
@@ -745,10 +740,6 @@ for t in range(len(zgp_data)):
                 idx = np.where( lon_blo_filtered3 == block_val)
                 idx=idx[1].tolist()
                 keep_running=True
-                #if block_val ==312:
-                #    print("block check 312", block_checked )
-                #if block_val ==310:
-                #    print("block check 310", block_checked )
                 while keep_running ==True:
                     out=0
                     indloop=0
@@ -773,7 +764,8 @@ for t in range(len(zgp_data)):
 
                                 ##which candidate has the most longitude in common
                                 most_block_candidate = max(block_candidate_list, key = block_candidate_list.count)
-
+                                if block_val ==311:
+                                    print("most_block_candidate", most_block_candidate, block_checked )
                                 ### check if the new candidate is in the block_checked. If yes we break the loop and going forward
                                 if most_block_candidate in block_checked and indloop==0:
                                     ##on ajoute candidats a la liste checkée
@@ -790,8 +782,6 @@ for t in range(len(zgp_data)):
                                 ##on ajoute candidats a la liste checkée
                                 block_checked.extend(block_candidate_list)
                                 block_checked=list(set(block_checked))
-                                #if block_val ==312:
-                                #    print("most_block_candidate", most_block_candidate, block_checked )
                             else:
                                 nb_day=nb_day+1
                                 ### Sinon si on a pas une longitude en commun, on doit vérifier à longitude+-22.5 si il y a une longitude de bloquée
@@ -801,8 +791,7 @@ for t in range(len(zgp_data)):
                                 right=longitude[idx[-1]]
                                 left_e=left-22.5
                                 right_e=right+22.5
-                                #print("final_blo", final_blo)
-
+    
                                 if left_e<0:
                                     left_ext=np.arange(left_e+360,360,dx).tolist()
                                     left_ext1=np.arange(0,left,dx).tolist()
@@ -850,8 +839,8 @@ for t in range(len(zgp_data)):
                                 else:
                                     most_block_candidate_right=np.nan
                                     rightcount_o =0
-                                #if block_val ==311:
-                                #    print("most_block_LR", most_block_candidate_right, most_block_candidate_left )
+                                if block_val ==311:
+                                    print("most_block_LR", most_block_candidate_right, most_block_candidate_left )
 
                                 ###condition si l'un des deux block a déjà été traité on zap:
                                 if most_block_candidate_left not in block_checked and most_block_candidate_right not in block_checked : 
@@ -891,10 +880,8 @@ for t in range(len(zgp_data)):
                                     if out==1 :
                                         ###keep only blocking >=5
                                         if len(block_true)>=5:
-                                            #print("end block_true",block_true)
                                             block_true.sort()
                                             final_blo.append(block_true)
-                                            #print("end final", final_blo)
                                             final_duration.append(nb_day-2)
                                         p=0
                                         block_true=[]
